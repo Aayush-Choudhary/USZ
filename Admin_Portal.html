@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sickrit Studio — Admin Backend Portal | USZ</title>
+  
+  <!-- Typography & Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #07090e;
+      --bg-surface: #0c1018;
+      --card: #121724;
+      --card-inner: #090c14;
+      --card-hover: #182032;
+      --line: rgba(255, 255, 255, 0.08);
+      --line-subtle: rgba(255, 255, 255, 0.04);
+      --line-hover: rgba(255, 255, 255, 0.16);
+
+      --ink: #f8fafc;
+      --ink-secondary: #cbd5e1;
+      --mute: #94a3b8;
+      --mute-dark: #64748b;
+
+      --gold: #5b6bff;
+      --gold-light: #7b8aff;
+      --gold-glow: rgba(201, 169, 110, 0.15);
+
+      --studio-blue: #4c6ef5;
+      --studio-blue-light: #748ffc;
+      --studio-blue-glow: rgba(76, 110, 245, 0.18);
+
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.18);
+      --warning: #f59e0b;
+      --danger: #f43f5e;
+      --danger-light: #fb7185;
+      --danger-glow: rgba(244, 63, 94, 0.18);
+
+      --font-sans: 'Inter Tight', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Inter Tight', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+
+      --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.6);
+      --transition-fast: 0.18s ease;
+      --transition-base: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Admin Lockscreen */
+    .admin-gate-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: radial-gradient(circle at 50% 30%, #151d2f 0%, #07090e 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(20px);
+      transition: opacity 0.35s ease, visibility 0.35s;
+    }
+    .admin-gate-overlay.is-unlocked {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .admin-gate-card {
+      width: min(440px, 100%);
+      background: rgba(15, 20, 31, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    /* App Header */
+    .admin-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--line);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--gold-light);
+    }
+    .badge-admin {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      background: var(--studio-blue-glow);
+      color: var(--studio-blue-light);
+      border: 1px solid rgba(76, 110, 245, 0.3);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .fb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--card);
+      border: 1px solid var(--line);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--mute);
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--studio-blue);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #3b5bdb; }
+    .btn-gold {
+      background: var(--gold);
+      color: #07090e;
+      font-weight: 700;
+    }
+    .btn-gold:hover { background: var(--gold-light); }
+    .btn-secondary {
+      background: var(--card);
+      border-color: var(--line);
+      color: var(--ink);
+    }
+    .btn-secondary:hover { background: var(--card-hover); border-color: var(--line-hover); }
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.12);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: var(--danger-light);
+    }
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.25);
+      border-color: var(--danger);
+      color: #fff;
+    }
+
+    /* Main Container & Tabs */
+    .admin-main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--mute);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--transition-fast);
+    }
+    .tab-btn:hover { color: var(--ink); background: var(--card-inner); }
+    .tab-btn.active {
+      background: var(--card);
+      border-color: var(--line-hover);
+      color: var(--gold-light);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: flex; flex-direction: column; gap: 24px; }
+
+    /* Admin Cards */
+    .admin-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line-subtle);
+      padding-bottom: 14px;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Form Fields */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: var(--font-mono);
+    }
+    .form-input, .form-textarea, .form-select {
+      background: var(--card-inner);
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--ink);
+      font-size: 13px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: var(--studio-blue);
+    }
+    .form-textarea { min-height: 80px; resize: vertical; line-height: 1.45; }
+
+    /* Script Option Subtabs */
+    .script-subnav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .script-subnav-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      background: var(--card-inner);
+      border: 1px solid var(--line);
+      color: var(--mute);
+      cursor: pointer;
+    }
+    .script-subnav-btn.active {
+      background: var(--studio-blue-glow);
+      border-color: var(--studio-blue);
+      color: #fff;
+    }
+
+    /* Scene Edit Card */
+    .scene-editor-block {
+      background: var(--card-inner);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .scene-editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Notes / Comments Table */
+    .notes-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .notes-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--mute);
+      border-bottom: 1px solid var(--line);
+    }
+    .notes-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line-subtle);
+      vertical-align: top;
+    }
+    .notes-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 13px;
+      color: var(--ink);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+    }
+    .toast.is-showing { opacity: 1; visibility: visible; }
+    /* Full-Page Branded Loading Screen */
+    .app-loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    .app-loading-screen.is-loaded {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 22px;
+      max-width: 440px;
+      width: 100%;
+    }
+    .loading-logo-wrap {
+      animation: logoPulse 2.2s infinite ease-in-out;
+    }
+    @keyframes logoPulse {
+      0%, 100% { opacity: 0.95; transform: scale(1); }
+      50% { opacity: 0.65; transform: scale(0.98); }
+    }
+    .loading-bar-wrap {
+      width: 180px;
+      height: 3px;
+      background: var(--line);
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loading-bar-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 45%;
+      background: var(--studio-blue);
+      border-radius: 99px;
+      box-shadow: 0 0 12px var(--studio-blue);
+      animation: loadingSlide 1.4s infinite ease-in-out;
+    }
+    @keyframes loadingSlide {
+      0% { left: -45%; width: 35%; }
+      50% { left: 30%; width: 55%; }
+      100% { left: 105%; width: 35%; }
+    }
+    .loading-status-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .loading-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      box-shadow: var(--shadow-lg);
+    }
+    .loading-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--studio-blue);
+      box-shadow: 0 0 8px var(--studio-blue);
+      animation: pulseDot 1.4s infinite ease-in-out;
+    }
+    .loading-subtext {
+      font-size: 11px;
+      color: var(--mute);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- FULL-PAGE SICKRIT BRANDED LOADING SCREEN -->
+  <div id="adminLoadingScreen" class="app-loading-screen" role="status" aria-live="polite">
+    <div class="loading-content">
+      <div class="brand-logo-wrap loading-logo-wrap">
+        <img src="Assets/Logo_White.png" alt="Sickrit Studio" style="height:36px; width:auto; object-fit:contain; display:block;">
+      </div>
+      <div class="loading-bar-wrap">
+        <div class="loading-bar-inner"></div>
+      </div>
+      <div class="loading-status-group">
+        <div class="loading-status-badge">
+          <span class="loading-pulse-dot"></span>
+          <span id="adminLoadingStatusText">Connecting to Server...</span>
+        </div>
+        <p class="loading-subtext">USZ · Admin Backend Portal</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MASTER ADMIN SECURITY GATE -->
+  <div class="admin-gate-overlay" id="adminGate">
+    <div class="admin-gate-card">
+      <div>
+        <div style="display:flex; justify-content:center; margin-bottom:12px;"><img src="Assets/Logo_White.png" alt="Sickrit Studio" style="height:32px; width:auto; object-fit:contain; display:block;"></div>
+        <p style="font-size:12.5px; color:var(--mute); margin-top:6px;">Master Control Portal for <strong>USZ</strong></p>
+      </div>
+
+      <form onsubmit="verifyAdminPasscode(event)">
+        <input type="password" id="adminPassInput" class="form-input" style="width:100%; height:44px; text-align:center; font-family:var(--font-mono);" placeholder="Enter Studio Master Passcode" required>
+        <p id="adminGateError" style="color:var(--danger-light); font-size:12px; margin-top:8px; min-height:16px;"></p>
+        <button type="submit" class="btn btn-gold" style="width:100%; height:44px; margin-top:10px;">Unlock Admin Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SITE HEADER -->
+  <header class="admin-header">
+    <div class="header-brand">
+      <img src="Assets/Logo_White.png" alt="Sickrit Studio" style="height:24px; width:auto; object-fit:contain; display:block;">
+      <span class="badge-admin">Backend Control Hub</span>
+      <span style="color:var(--mute); font-size:13px;">/ USZ — 3D Visualisation & Master Hero Commercial</span>
+    </div>
+
+    <div class="header-actions">
+      <div class="fb-badge">
+        <span class="pulse-dot" id="fbStatusDot"></span>
+        <span id="fbStatusLabel">Firestore: Connecting...</span>
+      </div>
+      <a href="index.html" target="_blank" class="btn btn-secondary" title="View client facing script approval portal">
+        <span>Open Client Portal ↗</span>
+      </a>
+      <button class="btn btn-secondary" onclick="lockAdminSession()">Lock Admin</button>
+    </div>
+  </header>
+
+  <!-- MAIN DASHBOARD -->
+  <main class="admin-main">
+    
+    <!-- NAVIGATION TABS -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('tab-project', this)">⚙️ Project & Security Settings</button>
+      <button class="tab-btn" onclick="switchTab('tab-scripts', this)">✍️ Script Proposals & Scenes</button>
+      <button class="tab-btn" onclick="switchTab('tab-notes', this)">💬 Client Feedback & Notes (<span id="tabNoteCountBadge">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('tab-history', this)">📜 Change Requests & Audit (<span id="tabAuditCountBadge">0</span>)</button>
+    </div>
+
+    <!-- TAB 1: PROJECT & SECURITY SETTINGS -->
+    <section class="tab-content active" id="tab-project">
+      <div class="admin-card">
+        <div class="card-title-group">
+          <h3 class="card-title">Project Metadata & Passcode</h3>
+          <button class="btn btn-gold" onclick="saveProjectMetadata()">Save Project Settings to Cloud</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Client Name</label>
+            <input type="text" id="metaClientName" class="form-input" value="USZ">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Document ID (Ref)</label>
+            <input type="text" id="metaDocId" class="form-input" value="SS-USZ-2026-01" readonly style="opacity:0.75;">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Project Campaign Title</label>
+            <input type="text" id="metaProjectTitle" class="form-input" value="USZ — 3D Visualisation & Master Hero Commercial">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1; background:var(--card-inner); border:1px solid rgba(201,169,110,0.3); padding:16px; border-radius:var(--radius-md);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <label class="form-label" style="color:var(--gold);">Client Authorization Passcode (Shared with Client)</label>
+                <p style="font-size:12px; color:var(--mute); margin-top:2px;">Clients must type this passcode to unlock their portal. You can change it anytime.</p>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="metaProjectPasscode" class="form-input" value="USZ2026" style="width:180px; font-family:var(--font-mono); font-weight:700; color:var(--gold-light);">
+                <button class="btn btn-primary" onclick="saveClientPasscodeOnly()">Update Passcode</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-title-group">
+          <h3 class="card-title">Sign-off Status & Decision State</h3>
+          <button class="btn btn-danger" onclick="resetProjectApproval()">Reset Approval / Reopen Review</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Active Project Status</label>
+            <select id="metaStatus" class="form-select">
+              <option value="IN_REVIEW">IN_REVIEW (Option Review · In Progress)</option>
+              <option value="CHANGES_REQUESTED">CHANGES_REQUESTED (Revisions Requested)</option>
+              <option value="APPROVED">APPROVED (Approved & Locked for Production)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Active Selected Proposal Option</label>
+            <select id="metaSelectedOption" class="form-select">
+              <option value="option-1">Option 1 — The Missing Layer</option>
+              <option value="option-2">Option 2 — The Velocity of Light</option>
+              <option value="option-3">Option 3 — Crafted in Silence</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Reviewer Name</label>
+            <input type="text" id="metaReviewer" class="form-input" placeholder="e.g. Sarah Jenkins (Brand Lead)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Formal Decision Title</label>
+            <input type="text" id="metaDecision" class="form-input" placeholder="PENDING / APPROVED & LOCKED / REVISIONS REQUESTED">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Sign-off / Change Request Statement Summary</label>
+            <textarea id="metaSummary" class="form-textarea" placeholder="Summary notes regarding the decision..."></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SCRIPT PROPOSALS EDITOR -->
+    <section class="tab-content" id="tab-scripts">
+      <div class="admin-card">
+        <div class="card-title-group">
+          <div>
+            <h3 class="card-title">Script Direction Editor</h3>
+            <p style="font-size:12px; color:var(--mute);">Edit titles, voiceovers, dialogue, and scene directions. Add or remove proposal options live via Firestore.</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="addNewScriptOption()">+ Add Proposal Option</button>
+            <button class="btn btn-danger" onclick="deleteActiveScriptOption()">🗑 Delete Active Option</button>
+            <button class="btn btn-gold" onclick="saveActiveScriptOption()">Publish Script Changes to Cloud</button>
+          </div>
+        </div>
+
+        <div class="script-subnav" id="scriptOptionSubnav">
+          <!-- Dynamically populated from localScriptDatabase -->
+        </div>
+
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="form-group">
+            <label class="form-label">Option Title</label>
+            <input type="text" id="editorOptTitle" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Genre / Style Pill</label>
+            <input type="text" id="editorOptGenre" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Target Runtime (e.g. 60s)</label>
+            <input type="text" id="editorOptRuntime" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pacing Cadence (WPM)</label>
+            <input type="number" id="editorOptWpm" class="form-input">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Concept / Logline</label>
+            <textarea id="editorOptConcept" class="form-textarea" style="min-height:60px;"></textarea>
+          </div>
+        </div>
+
+        <!-- SCENE BY SCENE BUILDER -->
+        <div style="border-top:1px solid var(--line-subtle); padding-top:18px; display:flex; flex-direction:column; gap:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="font-size:13.5px; font-weight:700; color:var(--ink-secondary);">Scene Breakdown & Dialogue Table</h4>
+            <button class="btn btn-secondary" onclick="addNewScene()">+ Add Scene</button>
+          </div>
+
+          <div id="scenesContainer" style="display:flex; flex-direction:column; gap:14px;">
+            <!-- Rendered Scenes -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CLIENT FEEDBACK & NOTES MODERATOR -->
+    <section class="tab-content" id="tab-notes">
+      <div class="admin-card">
+        <div class="card-title-group">
+          <div>
+            <h3 class="card-title">Client Feedback Notes & Annotations</h3>
+            <p style="font-size:12px; color:var(--mute);">Manage, resolve, or delete client comments logged from the review drawer.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-secondary" onclick="exportNotesToTXT()">Export Notes (.txt)</button>
+            <button class="btn btn-danger" onclick="deleteAllResolvedNotes()">Delete All Resolved Notes</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="notes-table">
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Anchor Scene</th>
+                <th>Category</th>
+                <th>Comment Text</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminNotesTableBody">
+              <!-- Dynamically populated from Firestore -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: CHANGE REQUESTS & AUDIT LOG -->
+    <section class="tab-content" id="tab-history">
+      <div class="admin-card">
+        <div class="card-title-group">
+          <div>
+            <h3 class="card-title">Change Requests & Approval Logs</h3>
+            <p style="font-size:12px; color:var(--mute);">Full audit trail of formal sign-offs and client revision requests.</p>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="notes-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Selected Script</th>
+                <th>Reviewer</th>
+                <th>Summary Statement</th>
+                <th>Timestamp</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminAuditTableBody">
+              <!-- Dynamically populated from Firestore -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Global Toast -->
+  <div class="toast" id="adminToast">Notification message</div>
+
+  <!-- SCRIPT ENGINE -->
+  <script>
+    // FIREBASE CLOUD CONFIGURATION
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyAtLCnDL_aaESXU2r4iRTxyvx-OaMVyMN4",
+      authDomain: "sickrit-usz-portal.firebaseapp.com",
+      projectId: "sickrit-usz-portal",
+      storageBucket: "sickrit-usz-portal.firebasestorage.app",
+      messagingSenderId: "534590599091",
+      appId: "1:534590599091:web:89832e767e5cfad25125c6",
+      projectPasscode: "USZ2026",
+      documentId: "SS-USZ-2026-01"
+    };
+
+    let fbDb = null;
+    let fbDocRef = null;
+    let isFirebaseActive = false;
+    let liveProjectData = {};
+    let activeEditingOptionId = 'option-1';
+    let localScriptDatabase = {};
+
+    // 1. Authentication Gate
+    function verifyAdminPasscode(e) {
+      e.preventDefault();
+      const input = document.getElementById('adminPassInput').value.trim();
+      const masterPass = 'sickrit2026';
+      const projectPass = FIREBASE_CONFIG.projectPasscode;
+
+      if (input === masterPass || input === projectPass || input.toLowerCase() === projectPass.toLowerCase()) {
+        localStorage.setItem('sickrit_admin_auth', 'true');
+        document.getElementById('adminGate').classList.add('is-unlocked');
+        showToast('Admin Authorized.');
+      } else {
+        document.getElementById('adminGateError').textContent = 'Incorrect admin passcode.';
+      }
+    }
+
+    function lockAdminSession() {
+      localStorage.removeItem('sickrit_admin_auth');
+      document.getElementById('adminGate').classList.remove('is-unlocked');
+      document.getElementById('adminPassInput').value = '';
+    }
+
+    // Tab Switching
+    function switchTab(tabId, btnEl) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btnEl.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById('adminToast');
+      toast.textContent = msg;
+      toast.classList.add('is-showing');
+      clearTimeout(window.__tto);
+      window.__tto = setTimeout(() => toast.classList.remove('is-showing'), 3000);
+    }
+
+    // Initialize Firebase and Listeners
+    function updateAdminLoading(text) {
+      const el = document.getElementById('adminLoadingStatusText');
+      if (el) el.textContent = text;
+    }
+    function dismissAdminLoading() {
+      const el = document.getElementById('adminLoadingScreen');
+      if (el) el.classList.add('is-loaded');
+    }
+
+    async function initAdminFirebase() {
+      const isAuth = localStorage.getItem('sickrit_admin_auth') === 'true';
+      if (isAuth) {
+        document.getElementById('adminGate').classList.add('is-unlocked');
+      }
+
+      if (!FIREBASE_CONFIG.apiKey) {
+        document.getElementById('fbStatusLabel').textContent = 'Firestore: Standby (Demo)';
+        updateAdminLoading('Connecting to Server...');
+        setTimeout(() => {
+          updateAdminLoading('Cloud on Standby · Opening Admin Hub...');
+          setTimeout(dismissAdminLoading, 400);
+        }, 500);
+        return;
+      }
+
+      // Safety timeout: dismiss loading after 5 seconds
+      setTimeout(dismissAdminLoading, 5000);
+
+      try {
+        updateAdminLoading('Connecting to Server...');
+
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js');
+        const { 
+          getFirestore, doc, onSnapshot, setDoc, updateDoc, deleteDoc, 
+          collection, query, orderBy, serverTimestamp 
+        } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+
+        const app = initializeApp(FIREBASE_CONFIG);
+        fbDb = getFirestore(app);
+        fbDocRef = doc(fbDb, "projects", FIREBASE_CONFIG.documentId);
+        isFirebaseActive = true;
+
+        document.getElementById('fbStatusLabel').textContent = 'Firestore: Live Synced (' + FIREBASE_CONFIG.projectId + ')';
+
+        // Listen for Project Doc changes
+        onSnapshot(fbDocRef, (snap) => {
+          if (snap.exists()) {
+            liveProjectData = snap.data();
+            renderProjectMetadataUI(liveProjectData);
+            if (liveProjectData.scriptDatabaseOverrides && typeof liveProjectData.scriptDatabaseOverrides === 'object') {
+              localScriptDatabase = JSON.parse(JSON.stringify(liveProjectData.scriptDatabaseOverrides));
+              renderScriptOptionSubnav();
+              updateMetaSelectedOptionDropdown();
+              if (!localScriptDatabase[activeEditingOptionId]) {
+                activeEditingOptionId = Object.keys(localScriptDatabase)[0] || 'option-1';
+              }
+              loadScriptToEditor(activeEditingOptionId);
+            }
+            dismissAdminLoading();
+          } else {
+            dismissAdminLoading();
+          }
+        });
+
+        // Listen for Notes changes
+        const notesCol = collection(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes");
+        onSnapshot(query(notesCol, orderBy("timestamp", "desc")), (snap) => {
+          const notes = [];
+          snap.forEach(d => notes.push({ id: d.id, ...d.data() }));
+          renderAdminNotesTable(notes);
+          document.getElementById('tabNoteCountBadge').textContent = notes.length;
+        });
+
+        // Listen for Change Requests
+        const changesCol = collection(fbDb, "projects", FIREBASE_CONFIG.documentId, "change_requests");
+        onSnapshot(query(changesCol, orderBy("timestamp", "desc")), (snap) => {
+          const auditItems = [];
+          snap.forEach(d => auditItems.push({ id: d.id, ...d.data() }));
+          renderAdminAuditTable(auditItems);
+          document.getElementById('tabAuditCountBadge').textContent = auditItems.length;
+        });
+
+      } catch (e) {
+        console.error('Admin Firebase init failed:', e);
+        document.getElementById('fbStatusLabel').textContent = 'Firestore: Connection Error';
+        dismissAdminLoading();
+      }
+    }
+
+    function renderProjectMetadataUI(data) {
+      if (data.clientName) document.getElementById('metaClientName').value = data.clientName;
+      if (data.projectTitle) document.getElementById('metaProjectTitle').value = data.projectTitle;
+      if (data.projectPasscode) document.getElementById('metaProjectPasscode').value = data.projectPasscode;
+      if (data.status) document.getElementById('metaStatus').value = data.status;
+      if (data.selectedOption) document.getElementById('metaSelectedOption').value = data.selectedOption;
+      if (data.reviewer) document.getElementById('metaReviewer').value = data.reviewer;
+      if (data.decision) document.getElementById('metaDecision').value = data.decision;
+      if (data.lastDecisionSummary || data.lastChangeRequestSummary) {
+        document.getElementById('metaSummary').value = data.lastDecisionSummary || data.lastChangeRequestSummary || '';
+      }
+    }
+
+    // Save Metadata to Firestore
+    async function saveProjectMetadata() {
+      if (!isFirebaseActive || !fbDb || !fbDocRef) {
+        showToast('Local demo mode: cannot save to cloud.');
+        return;
+      }
+      const saveBtn = document.querySelector('button[onclick="saveProjectMetadata()"]');
+      const origText = saveBtn ? saveBtn.textContent : '';
+      if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving to Firestore...'; }
+
+      try {
+        const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+        const selectedOpt = document.getElementById('metaSelectedOption').value;
+        const selectedOptData = (localScriptDatabase && localScriptDatabase[selectedOpt]) || {};
+        
+        const payload = {
+          clientName: document.getElementById('metaClientName').value.trim(),
+          projectTitle: document.getElementById('metaProjectTitle').value.trim(),
+          projectPasscode: document.getElementById('metaProjectPasscode').value.trim(),
+          status: document.getElementById('metaStatus').value,
+          selectedOption: selectedOpt,
+          selectedOptionTitle: selectedOptData.title || selectedOpt,
+          selectedOptionNumber: selectedOptData.number || selectedOpt,
+          reviewer: document.getElementById('metaReviewer').value.trim(),
+          decision: document.getElementById('metaDecision').value.trim(),
+          lastDecisionSummary: document.getElementById('metaSummary').value.trim(),
+          scriptDatabaseOverrides: localScriptDatabase,
+          lastUpdated: serverTimestamp()
+        };
+
+        await setDoc(fbDocRef, payload, { merge: true });
+        FIREBASE_CONFIG.projectPasscode = payload.projectPasscode;
+        showToast('Project settings & script published to Firestore!');
+        if (saveBtn) { 
+          saveBtn.textContent = '✓ Saved to Firestore'; 
+          setTimeout(() => { saveBtn.textContent = origText; saveBtn.disabled = false; }, 2000); 
+        }
+      } catch (e) {
+        console.error('saveProjectMetadata error:', e);
+        alert('Save error: ' + e.message);
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = origText; }
+      }
+    }
+
+    async function saveClientPasscodeOnly() {
+      const newPass = document.getElementById('metaProjectPasscode').value.trim();
+      if (!newPass) return alert('Enter a passcode');
+      if (isFirebaseActive && fbDb && fbDocRef) {
+        try {
+          const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          await setDoc(fbDocRef, { projectPasscode: newPass, lastUpdated: serverTimestamp() }, { merge: true });
+          FIREBASE_CONFIG.projectPasscode = newPass;
+          showToast('Client passcode updated in cloud database!');
+        } catch (e) {
+          console.error('saveClientPasscodeOnly error:', e);
+          alert('Passcode save error: ' + e.message);
+        }
+      } else {
+        FIREBASE_CONFIG.projectPasscode = newPass;
+        showToast('Passcode updated locally.');
+      }
+    }
+
+    async function resetProjectApproval() {
+      if (!confirm('Reset project approval to "IN_REVIEW"? This will unlock the client portal.')) return;
+      if (isFirebaseActive && fbDb && fbDocRef) {
+        try {
+          const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          await setDoc(fbDocRef, {
+            status: 'IN_REVIEW',
+            decision: 'PENDING',
+            approvedAt: null,
+            lastUpdated: serverTimestamp()
+          }, { merge: true });
+          document.getElementById('metaStatus').value = 'IN_REVIEW';
+          document.getElementById('metaDecision').value = 'PENDING';
+          showToast('Project status reset to IN_REVIEW.');
+        } catch (e) {
+          console.error('resetProjectApproval error:', e);
+          alert('Reset error: ' + e.message);
+        }
+      }
+    }
+
+    // Default Script Database Fallbacks
+    const DEFAULT_SCRIPTS = {
+  "option-1": {
+    "id": "option-1",
+    "number": "Option 1",
+    "title": "The Missing Layer",
+    "kicker": "PRE-PRODUCTION SCRIPT · PROPOSAL OPTION 1",
+    "genre": "2D MOTION GRAPHICS + LIVE OVERLAY",
+    "concept": "Connecting people, not content — moving from passive watching to genuine real-time conversation.",
+    "tagline": "USZ. The Missing Layer.",
+    "runtime": "63s",
+    "words": 69,
+    "wpm": 125,
+    "pacing": "~125 WPM  (Measured & Conversational)",
+    "deliverable": "16:9 Product Launch Teaser (~60s)",
+    "scenes": [
+      {
+        "sceneNum": "SCENE 1",
+        "name": "The Hollow Feed",
+        "time": "00–08s",
+        "duration": "08s",
+        "vo": [
+          "“We got good at finding people to watch.”",
+          "“Not at talking to them.”"
+        ],
+        "sfx": "Muffled algorithmic feed flutter; hollow digital room tone; lonely periodic cursor-tick; subtle sub-bass vacuum drop on empty reply box.",
+        "visual": "Dark screen. A feed of faceless thumbnails scrolls and fades. A cursor blinks in an empty reply box. Nothing comes back.",
+        "slug": "INT. THE HOLLOW FEED – CONTINUOUS",
+        "action": "Dark screen. A feed of faceless thumbnails scrolls and fades. A cursor blinks in an empty reply box. Nothing comes back.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“We got good at finding people to watch.” “Not at talking to them.”"
+      },
+      {
+        "sceneNum": "SCENE 2",
+        "name": "The Geometric Shift",
+        "time": "08–16s",
+        "duration": "16s",
+        "vo": [
+          "“Connecting people, not content.”"
+        ],
+        "sfx": "Crisp magnetic snap as feed lines compress; smooth rising sine sweep; clean typographic dissolve click; warm harmonic chime as 'people' anchors.",
+        "visual": "The feed collapses into one thin line. The line draws itself into a circle. The word “content” fades out and “people” stays.",
+        "slug": "INT. THE GEOMETRIC SHIFT – CONTINUOUS",
+        "action": "The feed collapses into one thin line. The line draws itself into a circle. The word “content” fades out and “people” stays.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Connecting people, not content.”"
+      },
+      {
+        "sceneNum": "SCENE 3",
+        "name": "Small Talk Origin",
+        "time": "16–26s",
+        "duration": "26s",
+        "vo": [
+          "“Say it the way you’d say it to a friend.”"
+        ],
+        "sfx": "Natural room acoustics; gentle mic-open haptic tap; soft real-time typewriter click cadence; delicate glass ping as Small Talk badge docks.",
+        "visual": "A person at a window, casually saying something to their phone. Their words turn into clean text beside them, with no captions and no editing. A small label appears: Small Talk.",
+        "slug": "INT. SMALL TALK ORIGIN – CONTINUOUS",
+        "action": "A person at a window, casually saying something to their phone. Their words turn into clean text beside them, with no captions and no editing. A small label appears: Small Talk.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Say it the way you’d say it to a friend.”"
+      },
+      {
+        "sceneNum": "SCENE 4",
+        "name": "Discovery Web",
+        "time": "26–36s",
+        "duration": "36s",
+        "vo": [
+          "“Somewhere, someone has lived it too.”"
+        ],
+        "sfx": "Soft organic sonar pulse; subtle resonant string swell; rhythmic node activation pings; magnetic snap on Discovery label reveal.",
+        "visual": "From that circle, thin lines drift out to a few others, each marked with an initial. The nearest ones brighten. Label: Discovery.",
+        "slug": "INT. DISCOVERY WEB – CONTINUOUS",
+        "action": "From that circle, thin lines drift out to a few others, each marked with an initial. The nearest ones brighten. Label: Discovery.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Somewhere, someone has lived it too.”"
+      },
+      {
+        "sceneNum": "SCENE 5",
+        "name": "Living Threads",
+        "time": "36–45s",
+        "duration": "45s",
+        "vo": [
+          "“Don’t like it. Answer it.”",
+          "“Every reply is a beginning.”"
+        ],
+        "sfx": "Resonant ping as reply registers; smooth low whoosh as thread thickens; branching kinetic snap; soft acoustic thud as two circles dock into private chat.",
+        "visual": "One circle answers back and its line thickens. A second reply branches off, and the web begins to grow. Two circles pull together into a quiet private chat.",
+        "slug": "INT. LIVING THREADS – CONTINUOUS",
+        "action": "One circle answers back and its line thickens. A second reply branches off, and the web begins to grow. Two circles pull together into a quiet private chat.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Don’t like it. Answer it.” “Every reply is a beginning.”"
+      },
+      {
+        "sceneNum": "SCENE 6",
+        "name": "Bazaar Exchange",
+        "time": "45–54s",
+        "duration": "54s",
+        "vo": [
+          "“Businesses don’t advertise. They join in.”",
+          "“Customers aren’t acquired. They’re met.”"
+        ],
+        "sfx": "Subtle morning café ambience (espresso hiss snippet); crisp UI message sent blip; affirmative double-haptic confirmation tap; cash register bell overtone.",
+        "visual": "The same circles and lines, but one is now a café marked “Open 6 AM.” A question travels in, an answer comes back, and a small booking tick appears. Label: Bazaar.",
+        "slug": "INT. BAZAAR EXCHANGE – CONTINUOUS",
+        "action": "The same circles and lines, but one is now a café marked “Open 6 AM.” A question travels in, an answer comes back, and a small booking tick appears. Label: Bazaar.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Businesses don’t advertise. They join in.” “Customers aren’t acquired. They’re met.”"
+      },
+      {
+        "sceneNum": "SCENE 7",
+        "name": "The Constellation",
+        "time": "54–60s",
+        "duration": "60s",
+        "vo": [
+          "“Not a better way to watch.”",
+          "“A better way to meet.”"
+        ],
+        "sfx": "Cinematic low-pass whoosh as camera retreats; shimmering celestial harmonic chord; deep resonant bass settle as line loops into the USZ curve.",
+        "visual": "The camera pulls back. Every person and business becomes one still constellation. The line completes its loop and settles into the logo.",
+        "slug": "INT. THE CONSTELLATION – CONTINUOUS",
+        "action": "The camera pulls back. Every person and business becomes one still constellation. The line completes its loop and settles into the logo.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Not a better way to watch.” “A better way to meet.”"
+      },
+      {
+        "sceneNum": "END CARD",
+        "name": "Brand Reveal",
+        "time": "60–63s",
+        "duration": "63s",
+        "vo": [
+          "ON SCREEN:",
+          "“Say something.”"
+        ],
+        "sfx": "Sub-bass resolving boom; crisp mechanical camera shutter click; warm reverb tail fading to total silence.",
+        "visual": "USZ logo on dark.",
+        "slug": "INT. BRAND REVEAL – CONTINUOUS",
+        "action": "USZ logo on dark.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "ON SCREEN: “Say something.”"
+      }
+    ]
+  },
+  "option-2": {
+    "id": "option-2",
+    "number": "Option 2",
+    "title": "Conversation Over Content",
+    "kicker": "PRE-PRODUCTION SCRIPT · PROPOSAL OPTION 2",
+    "genre": "KINETIC TYPOGRAPHY + SPATIAL UI",
+    "concept": "What if the fundamental unit of social media wasn't content, but conversation?",
+    "tagline": "USZ. Conversation Over Content.",
+    "runtime": "86s",
+    "words": 118,
+    "wpm": 130,
+    "pacing": "~130 WPM  (Dynamic & Inquisitive)",
+    "deliverable": "16:9 Product Launch Teaser (00–86s)",
+    "scenes": [
+      {
+        "sceneNum": "SCENE 1",
+        "name": "The Core Question",
+        "time": "00–08s",
+        "duration": "08s",
+        "vo": [
+          "“What if social media worked differently?”"
+        ],
+        "sfx": "Muffled algorithmic feed whoosh; single high-clarity bell tone on question mark; tape-stop stutter as feed glitches into clean negative space.",
+        "visual": "Minimal typography. A familiar social media feed appears, then transforms into something new.",
+        "slug": "INT. THE CORE QUESTION – CONTINUOUS",
+        "action": "Minimal typography. A familiar social media feed appears, then transforms into something new.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“What if social media worked differently?”"
+      },
+      {
+        "sceneNum": "SCENE 2",
+        "name": "The Living Space",
+        "time": "08–17s",
+        "duration": "17s",
+        "vo": [
+          "“Not another feed to scroll through. Not another place to post. But a place to actually talk.”"
+        ],
+        "sfx": "Subtle mechanical sliding tiles; interface deconstruction clicks; warm ambient room tone blooming in as talk interface settles.",
+        "visual": "UI elements subtly rearrange. The conventional post interface transforms into a Small Talk interaction.",
+        "slug": "INT. THE LIVING SPACE – CONTINUOUS",
+        "action": "UI elements subtly rearrange. The conventional post interface transforms into a Small Talk interaction.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Not another feed to scroll through. Not another place to post. But a place to actually talk.”"
+      },
+      {
+        "sceneNum": "SCENE 3",
+        "name": "The Small Talk Engine",
+        "time": "17–30s",
+        "duration": "30s",
+        "vo": [
+          "“This is USZ. At its heart is something simple: Small Talk. Capture a moment, share a thought, or express an experience.”"
+        ],
+        "sfx": "Soft haptic mic activation click; organic voice waveform hum; rapid pleasant typewriter-like text transcription clicks.",
+        "visual": "Demonstrate the Small Talk creation mechanism. Someone speaks naturally, with the speech becoming structured text.",
+        "slug": "INT. THE SMALL TALK ENGINE – CONTINUOUS",
+        "action": "Demonstrate the Small Talk creation mechanism. Someone speaks naturally, with the speech becoming structured text.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“This is USZ. At its heart is something simple: Small Talk. Capture a moment, share a thought, or express an experience.”"
+      },
+      {
+        "sceneNum": "SCENE 4",
+        "name": "Semantic Discovery",
+        "time": "30–43s",
+        "duration": "43s",
+        "vo": [
+          "“Every expression becomes an opportunity to discover something new. Find conversations that matter to you, and people who relate to them.”"
+        ],
+        "sfx": "Soft electronic chime series; magnetic connection clicks; sweeping stereo synth pad showing semantic pathing.",
+        "visual": "Show Discovery and semantic routing through interconnected conversations.",
+        "slug": "INT. SEMANTIC DISCOVERY – CONTINUOUS",
+        "action": "Show Discovery and semantic routing through interconnected conversations.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Every expression becomes an opportunity to discover something new. Find conversations that matter to you, and people who relate to them.”"
+      },
+      {
+        "sceneNum": "SCENE 5",
+        "name": "Conversational Growth",
+        "time": "43–54s",
+        "duration": "54s",
+        "vo": [
+          "“Because conversations don't end with a like. They grow through responses, perspectives, and connections.”"
+        ],
+        "sfx": "Branching glass harmonic pings; tactile bubble pops as responses bud; low rhythmic bass pulse tracking the graph expansion.",
+        "visual": "One Small Talk leads to another. A conversation graph develops organically.",
+        "slug": "INT. CONVERSATIONAL GROWTH – CONTINUOUS",
+        "action": "One Small Talk leads to another. A conversation graph develops organically.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Because conversations don't end with a like. They grow through responses, perspectives, and connections.”"
+      },
+      {
+        "sceneNum": "SCENE 6",
+        "name": "Private Channels",
+        "time": "54–63s",
+        "duration": "63s",
+        "vo": [
+          "“Take those connections further. Continue privately, just like a conversation should.”"
+        ],
+        "sfx": "Smooth inward suction swoosh; soft velvet curtain close effect; muffled reassuring encryption/lock chime.",
+        "visual": "Show the connection interface transitioning into private communication.",
+        "slug": "INT. PRIVATE CHANNELS – CONTINUOUS",
+        "action": "Show the connection interface transitioning into private communication.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Take those connections further. Continue privately, just like a conversation should.”"
+      },
+      {
+        "sceneNum": "SCENE 7",
+        "name": "Bazaar Commerce",
+        "time": "63–77s",
+        "duration": "77s",
+        "vo": [
+          "“And for businesses, there's Bazaar. A space to be discovered, share what's happening, answer questions, and build relationships with customers.”"
+        ],
+        "sfx": "Friendly storefront bell; instant inquiry tap; real-time conversational notification chime; satisfying confirmation haptic click.",
+        "visual": "Show business Small Talks, product discovery, inquiries and customer interactions.",
+        "slug": "INT. BAZAAR COMMERCE – CONTINUOUS",
+        "action": "Show business Small Talks, product discovery, inquiries and customer interactions.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“And for businesses, there's Bazaar. A space to be discovered, share what's happening, answer questions, and build relationships with customers.”"
+      },
+      {
+        "sceneNum": "SCENE 8",
+        "name": "Brand Convergence",
+        "time": "77–86s",
+        "duration": "86s",
+        "vo": [
+          "“One platform. A different way to connect. USZ.”"
+        ],
+        "sfx": "Multitrack elements pulling inward with deep sub-bass sweep; crisp graphic logo snap; warm enduring harmonic decay.",
+        "visual": "The interconnected UI elements converge into the USZ identity.",
+        "slug": "INT. BRAND CONVERGENCE – CONTINUOUS",
+        "action": "The interconnected UI elements converge into the USZ identity.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“One platform. A different way to connect. USZ.”"
+      }
+    ]
+  },
+  "option-3": {
+    "id": "option-3",
+    "number": "Option 3",
+    "title": "Less Scrolling. More Connecting.",
+    "kicker": "PRE-PRODUCTION SCRIPT · PROPOSAL OPTION 3",
+    "genre": "CINEMATIC NARRATIVE + VOICE-FIRST UI",
+    "concept": "This direction makes the viewer understand the philosophy before introducing the product, establishing an emotional reason for USZ to exist.",
+    "tagline": "USZ. Less Scrolling. More Connecting..",
+    "runtime": "85s",
+    "words": 113,
+    "wpm": 120,
+    "pacing": "~120 WPM  (Reflective & Philosophical)",
+    "deliverable": "16:9 Product Launch Teaser (00–85s)",
+    "scenes": [
+      {
+        "sceneNum": "SCENE 1",
+        "name": "The Infinite Stream",
+        "time": "00–10s",
+        "duration": "10s",
+        "vo": [
+          "“We've never been more connected. Yet, most of what we do online is simply scroll, watch, and move on.”"
+        ],
+        "sfx": "Fast fluttering screen swipe sounds; muffled notifications cascade; digital static drone fading into a solitary low piano key.",
+        "visual": "Fast but subtle glimpses of social feeds. Likes, comments, posts. Everything disappears into an endless stream.",
+        "slug": "INT. THE INFINITE STREAM – CONTINUOUS",
+        "action": "Fast but subtle glimpses of social feeds. Likes, comments, posts. Everything disappears into an endless stream.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“We've never been more connected. Yet, most of what we do online is simply scroll, watch, and move on.”"
+      },
+      {
+        "sceneNum": "SCENE 2",
+        "name": "The Human Behind",
+        "time": "10–18s",
+        "duration": "18s",
+        "vo": [
+          "“We follow people. We see their lives. But how often do we actually connect?”"
+        ],
+        "sfx": "Abrupt stop sound; UI elements dissolve with whispery white-noise fade; clear breathing audio in stereo silence.",
+        "visual": "The scrolling stops. A post remains on screen. Its interface slowly fades, leaving the person behind it.",
+        "slug": "INT. THE HUMAN BEHIND – CONTINUOUS",
+        "action": "The scrolling stops. A post remains on screen. Its interface slowly fades, leaving the person behind it.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“We follow people. We see their lives. But how often do we actually connect?”"
+      },
+      {
+        "sceneNum": "SCENE 3",
+        "name": "The Paradigm Shift",
+        "time": "18–28s",
+        "duration": "28s",
+        "vo": [
+          "“What if social media wasn't just about sharing content, but starting conversations?”"
+        ],
+        "sfx": "Soft upward frequency sweep; clean phone pickup handling click; warm human room acoustic brightening up.",
+        "visual": "Transition into the USZ interface. A person casually speaking into their phone. A Small Talk begins.",
+        "slug": "INT. THE PARADIGM SHIFT – CONTINUOUS",
+        "action": "Transition into the USZ interface. A person casually speaking into their phone. A Small Talk begins.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“What if social media wasn't just about sharing content, but starting conversations?”"
+      },
+      {
+        "sceneNum": "SCENE 4",
+        "name": "Small Talk Mechanism",
+        "time": "28–40s",
+        "duration": "40s",
+        "vo": [
+          "“Introducing USZ. A new way to express yourself through Small Talks. Simply speak, share an experience, or put a thought out there.”"
+        ],
+        "sfx": "Gentle record trigger pip; soft vocal frequency glow; crisp fluid typography formation sounds.",
+        "visual": "Show the voice-first Small Talk mechanism. Speech, visual capture and its interpreted text representation.",
+        "slug": "INT. SMALL TALK MECHANISM – CONTINUOUS",
+        "action": "Show the voice-first Small Talk mechanism. Speech, visual capture and its interpreted text representation.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Introducing USZ. A new way to express yourself through Small Talks. Simply speak, share an experience, or put a thought out there.”"
+      },
+      {
+        "sceneNum": "SCENE 5",
+        "name": "Contextual Discovery",
+        "time": "40–51s",
+        "duration": "51s",
+        "vo": [
+          "“Discover conversations beyond your circle. Find people who share your interests, experiences, and perspectives.”"
+        ],
+        "sfx": "Soft resonant node pings; smooth directional pan whooshes; warm harmonic chord resolving on shared match.",
+        "visual": "Small Talks move into Discovery. Different conversations connect through shared context.",
+        "slug": "INT. CONTEXTUAL DISCOVERY – CONTINUOUS",
+        "action": "Small Talks move into Discovery. Different conversations connect through shared context.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Discover conversations beyond your circle. Find people who share your interests, experiences, and perspectives.”"
+      },
+      {
+        "sceneNum": "SCENE 6",
+        "name": "Branching Dialogues",
+        "time": "51–60s",
+        "duration": "60s",
+        "vo": [
+          "“Respond. Connect. And let one conversation lead to another.”"
+        ],
+        "sfx": "Double-tap haptic send sound; branching chime sequence; gentle sliding card motion into private chat tray.",
+        "visual": "A Small Talk receives a response, which branches into another interaction. Show Connections and private communication.",
+        "slug": "INT. BRANCHING DIALOGUES – CONTINUOUS",
+        "action": "A Small Talk receives a response, which branches into another interaction. Show Connections and private communication.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“Respond. Connect. And let one conversation lead to another.”"
+      },
+      {
+        "sceneNum": "SCENE 7",
+        "name": "Bazaar Integration",
+        "time": "60–75s",
+        "duration": "75s",
+        "vo": [
+          "“And with Bazaar, businesses become part of the conversation. Discover brands, explore offerings, ask questions, and connect directly.”"
+        ],
+        "sfx": "Acoustic café/workshop ambient soundbed; direct messaging chime; smooth storefront card swipe; instant confirmation tone.",
+        "visual": "Transition into a business Small Talk. Show a brand sharing an experience, followed by customer interaction.",
+        "slug": "INT. BAZAAR INTEGRATION – CONTINUOUS",
+        "action": "Transition into a business Small Talk. Show a brand sharing an experience, followed by customer interaction.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“And with Bazaar, businesses become part of the conversation. Discover brands, explore offerings, ask questions, and connect directly.”"
+      },
+      {
+        "sceneNum": "SCENE 8",
+        "name": "The Confident Ending",
+        "time": "75–85s",
+        "duration": "85s",
+        "vo": [
+          "“USZ. Less scrolling. More connecting.”"
+        ],
+        "sfx": "Deep cinematic sub-bass hit; crystal logo shimmer; subtle vinyl silence cut.",
+        "visual": "Minimal USZ logo reveal. Clean sound design and a confident ending.",
+        "slug": "INT. THE CONFIDENT ENDING – CONTINUOUS",
+        "action": "Minimal USZ logo reveal. Clean sound design and a confident ending.",
+        "character": "NARRATOR (V.O.)",
+        "dialogue": "“USZ. Less scrolling. More connecting.”"
+      }
+    ]
+  }
+};
+
+    localScriptDatabase = JSON.parse(JSON.stringify(DEFAULT_SCRIPTS));
+
+    // Dynamically update the Tab 1 dropdown for selected proposal
+    function updateMetaSelectedOptionDropdown() {
+      const select = document.getElementById('metaSelectedOption');
+      if (!select) return;
+      const currentVal = select.value;
+      select.innerHTML = '';
+      const keys = Object.keys(localScriptDatabase).sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, '') || '0', 10);
+        const numB = parseInt(b.replace(/\D/g, '') || '0', 10);
+        if (numA !== numB) return numA - numB;
+        return a.localeCompare(b);
+      });
+      keys.forEach((k, idx) => {
+        const opt = localScriptDatabase[k];
+        const optionEl = document.createElement('option');
+        optionEl.value = k;
+        optionEl.textContent = `${opt.number || ('Option ' + (idx + 1))} — ${opt.title || 'Untitled'}`;
+        select.appendChild(optionEl);
+      });
+      if (keys.includes(currentVal)) {
+        select.value = currentVal;
+      } else if (keys.length > 0) {
+        select.value = keys[0];
+      }
+    }
+
+    // Dynamically render Script Subnav Tabs from localScriptDatabase
+    function renderScriptOptionSubnav() {
+      const subnav = document.getElementById('scriptOptionSubnav');
+      if (!subnav) return;
+      subnav.innerHTML = '';
+      const keys = Object.keys(localScriptDatabase).sort((a, b) => {
+        const numA = parseInt(a.replace(/\D/g, '') || '0', 10);
+        const numB = parseInt(b.replace(/\D/g, '') || '0', 10);
+        if (numA !== numB) return numA - numB;
+        return a.localeCompare(b);
+      });
+      keys.forEach((k, idx) => {
+        const opt = localScriptDatabase[k];
+        const btn = document.createElement('button');
+        btn.className = `script-subnav-btn ${k === activeEditingOptionId ? 'active' : ''}`;
+        btn.dataset.optId = k;
+        btn.textContent = `${opt.number || ('Option ' + (idx + 1))}: ${opt.title || 'Untitled'}`;
+        btn.onclick = () => loadScriptToEditor(k, btn);
+        subnav.appendChild(btn);
+      });
+    }
+
+    // Add New Proposal Option
+    async function addNewScriptOption() {
+      const keys = Object.keys(localScriptDatabase);
+      const nextNum = keys.length + 1;
+      const newId = `option-${Date.now().toString().slice(-4)}`;
+      const optName = prompt(`Enter Title for New Script Option ${nextNum}:`, `Script Proposal ${nextNum}`);
+      if (!optName) return;
+
+      localScriptDatabase[newId] = {
+        id: newId,
+        number: `Option ${nextNum}`,
+        title: optName.trim(),
+        genre: 'Cinematic Narrative',
+        runtime: '60s',
+        words: 70,
+        wpm: 130,
+        concept: 'New proposed creative direction for the brand film.',
+        scenes: [
+          {
+            sceneNum: 'SCENE 1',
+            name: 'Opening Scene',
+            time: '00 — 10s',
+            duration: '10s',
+            vo: ['Spoken narration line goes here.'],
+            sfx: 'SFX: Ambient tone.',
+            visual: 'Camera movement and visual direction.',
+            slug: 'INT. STUDIO — DAY',
+            action: 'Visual scene description.',
+            character: 'NARRATOR (V.O.)',
+            dialogue: 'Spoken narration line goes here.'
+          }
+        ]
+      };
+
+      activeEditingOptionId = newId;
+      renderScriptOptionSubnav();
+      updateMetaSelectedOptionDropdown();
+      loadScriptToEditor(newId);
+
+      // Publish to Firestore
+      if (isFirebaseActive && fbDb && fbDocRef) {
+        try {
+          const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          await setDoc(fbDocRef, {
+            scriptDatabaseOverrides: localScriptDatabase,
+            lastUpdated: serverTimestamp()
+          }, { merge: true });
+          showToast(`Option "${optName}" created & published to client portal!`);
+        } catch (e) {
+          alert('Error syncing to Firestore: ' + e.message);
+        }
+      } else {
+        showToast(`Option "${optName}" created locally.`);
+      }
+    }
+
+    // Delete Active Proposal Option (Supports going below 3 options: 2 options or 1 option)
+    async function deleteActiveScriptOption() {
+      const keys = Object.keys(localScriptDatabase);
+      if (keys.length <= 1) {
+        alert('You must have at least one script option proposal in the project.');
+        return;
+      }
+
+      const idToDelete = activeEditingOptionId;
+      const opt = localScriptDatabase[idToDelete] || {};
+      const optTitle = opt.title || idToDelete;
+
+      if (!confirm(`Are you sure you want to permanently delete "${optTitle}" (${opt.number || idToDelete})? This will remove it from the client portal.`)) {
+        return;
+      }
+
+      // 1. Remove from local memory
+      delete localScriptDatabase[idToDelete];
+      const remainingKeys = Object.keys(localScriptDatabase);
+      activeEditingOptionId = remainingKeys[0];
+
+      // 2. Re-render Admin UI immediately
+      renderScriptOptionSubnav();
+      updateMetaSelectedOptionDropdown();
+      loadScriptToEditor(activeEditingOptionId);
+
+      // 3. Immediately update Firestore (replaces scriptDatabaseOverrides completely so deleted option never returns)
+      if (isFirebaseActive && fbDb && fbDocRef) {
+        try {
+          const { updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          
+          const updatePayload = {
+            scriptDatabaseOverrides: localScriptDatabase,
+            lastUpdated: serverTimestamp()
+          };
+
+          if (liveProjectData && liveProjectData.selectedOption === idToDelete) {
+            updatePayload.selectedOption = activeEditingOptionId;
+            updatePayload.selectedOptionTitle = localScriptDatabase[activeEditingOptionId]?.title || 'Option';
+            updatePayload.selectedOptionNumber = localScriptDatabase[activeEditingOptionId]?.number || 'Option 1';
+          }
+
+          await updateDoc(fbDocRef, updatePayload);
+          showToast(`Option "${optTitle}" permanently deleted from cloud database.`);
+        } catch (e) {
+          console.error('Firestore delete option error:', e);
+          alert('Error syncing deletion to Firestore: ' + e.message);
+        }
+      } else {
+        showToast(`Script option removed locally. (${remainingKeys.length} option(s) active)`);
+      }
+    }
+
+    // Load Script Proposal into Editor
+    function loadScriptToEditor(optId, btnEl) {
+      activeEditingOptionId = optId;
+      document.querySelectorAll('.script-subnav-btn').forEach(b => {
+        if (b.dataset.optId === optId) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      if (btnEl) btnEl.classList.add('active');
+
+      const data = localScriptDatabase[optId] || DEFAULT_SCRIPTS[optId] || { title: '', genre: '', runtime: '60s', wpm: 130, concept: '', scenes: [] };
+      document.getElementById('editorOptTitle').value = data.title || '';
+      document.getElementById('editorOptGenre').value = data.genre || '';
+      document.getElementById('editorOptRuntime').value = data.runtime || '60s';
+      document.getElementById('editorOptWpm').value = data.wpm || 130;
+      document.getElementById('editorOptConcept').value = data.concept || '';
+
+      renderScenesEditor(data.scenes || []);
+    }
+
+    function renderScenesEditor(scenes) {
+      const container = document.getElementById('scenesContainer');
+      container.innerHTML = '';
+
+      scenes.forEach((sc, idx) => {
+        const div = document.createElement('div');
+        div.className = 'scene-editor-block';
+        div.innerHTML = `
+          <div class="scene-editor-header">
+            <span style="font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--gold);">Scene ${idx + 1}: ${sc.sceneNum || 'SCENE ' + (idx + 1)}</span>
+            <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteScene(${idx})">Delete Scene</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Scene Title</label>
+              <input type="text" class="form-input scene-name-input" value="${escapeHTML(sc.name || '')}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Timecode (e.g. 00 — 08s)</label>
+              <input type="text" class="form-input scene-time-input" value="${escapeHTML(sc.time || '')}">
+            </div>
+            <div class="form-group" style="grid-column:1 / -1;">
+              <label class="form-label">Audio / Spoken Voiceover (1 line per spoken sentence)</label>
+              <textarea class="form-textarea scene-vo-input">${escapeHTML(Array.isArray(sc.vo) ? sc.vo.join('\n') : (sc.vo || ''))}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sound FX (SFX)</label>
+              <input type="text" class="form-input scene-sfx-input" value="${escapeHTML(sc.sfx || '')}">
+            </div>
+            <div class="form-group" style="grid-column:1 / -1;">
+              <label class="form-label">Visual & Camera Direction</label>
+              <textarea class="form-textarea scene-visual-input">${escapeHTML(sc.visual || '')}</textarea>
+            </div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addNewScene() {
+      const opt = localScriptDatabase[activeEditingOptionId];
+      if (!opt.scenes) opt.scenes = [];
+      opt.scenes.push({
+        sceneNum: `SCENE ${opt.scenes.length + 1}`,
+        name: 'New Scene',
+        time: '00 — 10s',
+        vo: ['Dialogue line here.'],
+        sfx: 'SFX: Ambient tone.',
+        visual: 'Visual direction here.'
+      });
+      renderScenesEditor(opt.scenes);
+    }
+
+    function deleteScene(idx) {
+      const opt = localScriptDatabase[activeEditingOptionId];
+      if (opt && opt.scenes) {
+        opt.scenes.splice(idx, 1);
+        renderScenesEditor(opt.scenes);
+      }
+    }
+
+    // Save Active Script to Firestore
+    async function saveActiveScriptOption() {
+      const opt = localScriptDatabase[activeEditingOptionId] || {};
+      opt.id = activeEditingOptionId;
+      opt.title = document.getElementById('editorOptTitle').value.trim();
+      opt.genre = document.getElementById('editorOptGenre').value.trim();
+      opt.runtime = document.getElementById('editorOptRuntime').value.trim();
+      opt.wpm = parseInt(document.getElementById('editorOptWpm').value) || 130;
+      opt.concept = document.getElementById('editorOptConcept').value.trim();
+      if (!opt.number) {
+        const keys = Object.keys(localScriptDatabase);
+        const idx = keys.indexOf(activeEditingOptionId);
+        opt.number = `Option ${idx >= 0 ? idx + 1 : 1}`;
+      }
+      opt.deliverable = opt.deliverable || `16:9 Brand Film (~${opt.runtime || '60s'})`;
+      opt.pacing = opt.pacing || `${opt.wpm || 130} WPM / ${opt.genre || 'Cinematic'}`;
+      opt.kicker = opt.kicker || `PRE-PRODUCTION SCRIPT · PROPOSAL ${opt.number.toUpperCase()}`;
+
+      // Collect scenes
+      const sceneBlocks = document.querySelectorAll('.scene-editor-block');
+      const updatedScenes = [];
+      sceneBlocks.forEach((block, i) => {
+        const name = block.querySelector('.scene-name-input').value.trim();
+        const time = block.querySelector('.scene-time-input').value.trim();
+        const voRaw = block.querySelector('.scene-vo-input').value.trim();
+        const sfx = block.querySelector('.scene-sfx-input').value.trim();
+        const visual = block.querySelector('.scene-visual-input').value.trim();
+
+        updatedScenes.push({
+          sceneNum: `SCENE ${i + 1}`,
+          name: name || `Scene ${i + 1}`,
+          time: time || '00 – 08s',
+          duration: time ? (time.split('–')[1] || time.split('-')[1] || '').trim() : '8s',
+          vo: voRaw.split('\n').filter(l => l.trim().length > 0),
+          sfx: sfx,
+          visual: visual,
+          slug: `INT. ${(name || 'SCENE').toUpperCase()} – CONTINUOUS`,
+          action: visual,
+          character: 'NARRATOR (V.O.)',
+          dialogue: voRaw
+        });
+      });
+
+      opt.scenes = updatedScenes;
+      opt.words = updatedScenes.reduce((acc, sc) => acc + (sc.vo ? sc.vo.join(' ').split(/\s+/).filter(Boolean).length : 0), 0);
+      localScriptDatabase[activeEditingOptionId] = opt;
+
+      renderScriptOptionSubnav();
+      updateMetaSelectedOptionDropdown();
+
+      const publishBtn = document.querySelector('button[onclick="saveActiveScriptOption()"]');
+      const origText = publishBtn ? publishBtn.textContent : '';
+      if (publishBtn) { publishBtn.disabled = true; publishBtn.textContent = 'Publishing to Cloud...'; }
+
+      if (isFirebaseActive && fbDb && fbDocRef) {
+        try {
+          const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          
+          const payload = {
+            scriptDatabaseOverrides: localScriptDatabase,
+            lastUpdated: serverTimestamp()
+          };
+
+          await setDoc(fbDocRef, payload, { merge: true });
+          showToast(`Published "${opt.title}" to Firestore live!`);
+          if (publishBtn) { 
+            publishBtn.textContent = '✓ Published to Cloud'; 
+            setTimeout(() => { publishBtn.textContent = origText; publishBtn.disabled = false; }, 2000); 
+          }
+        } catch (e) {
+          console.error('Firestore save error:', e);
+          alert('Error publishing to Firestore: ' + e.message);
+          if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = origText; }
+        }
+      } else {
+        showToast('Saved locally.');
+        if (publishBtn) { publishBtn.disabled = false; publishBtn.textContent = origText; }
+      }
+    }
+
+    // Render Notes Table
+    function renderAdminNotesTable(notes) {
+      const tbody = document.getElementById('adminNotesTableBody');
+      tbody.innerHTML = '';
+
+      if (notes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--mute); padding:24px;">No feedback notes logged yet.</td></tr>`;
+        return;
+      }
+
+      notes.forEach((n, idx) => {
+        const isResolved = n.resolved === true;
+        const tr = document.createElement('tr');
+
+        const repliesHtml = (n.replies && Array.isArray(n.replies) && n.replies.length > 0) ? `
+          <div style="margin-top:8px; padding:8px 10px; background:rgba(255,255,255,0.03); border-left:2px solid var(--studio-blue); border-radius:4px; font-size:11.5px;">
+            ${n.replies.map((rep, rIdx) => `
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px; border-bottom:1px solid rgba(255,255,255,0.04); padding-bottom:4px;">
+                <div>
+                  <strong style="color:var(--studio-blue-light);">${escapeHTML(rep.author || 'Studio')}:</strong>
+                  <span style="color:var(--ink-secondary); margin-left:4px;">${escapeHTML(rep.text || '')}</span>
+                  <span style="color:var(--mute); font-size:10px; margin-left:6px; font-family:var(--font-mono);">${escapeHTML(rep.time || '')}</span>
+                </div>
+                <button style="background:transparent; border:none; color:var(--mute); cursor:pointer; font-size:14px; line-height:1; margin-left:6px;" title="Delete reply" onclick="adminDeleteReply('${n.id}', ${rIdx})">&times;</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : '';
+
+        tr.innerHTML = `
+          <td><strong>${escapeHTML(n.author || 'Reviewer')}</strong></td>
+          <td><span style="font-family:var(--font-mono); color:var(--gold);">${escapeHTML(n.scene || 'General')}</span></td>
+          <td><span style="font-size:11px; padding:2px 8px; border-radius:var(--radius-pill); background:var(--card); border:1px solid var(--line);">${escapeHTML(n.category || 'Note')}</span></td>
+          <td style="max-width:360px;">
+            <p style="margin:0;">"${escapeHTML(n.text || '')}"</p>
+            ${repliesHtml}
+            <div style="margin-top:8px; display:flex; gap:6px;">
+              <input type="text" id="adminReplyInput_${n.id}" class="form-input" style="padding:4px 8px; font-size:11.5px; height:28px;" placeholder="Reply as Studio Lead..." onkeydown="if(event.key==='Enter') adminSubmitReply('${n.id}')">
+              <button class="btn btn-secondary" style="padding:4px 10px; font-size:11px; height:28px;" onclick="adminSubmitReply('${n.id}')">Reply</button>
+            </div>
+          </td>
+          <td><span style="color:${isResolved ? 'var(--success)' : 'var(--warning)'}; font-weight:600;">${isResolved ? '✓ Resolved' : '◯ Open'}</span></td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="toggleNoteResolved('${n.id}', ${!isResolved})">
+                ${isResolved ? 'Reopen' : 'Resolve'}
+              </button>
+              <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="adminDeleteNote('${n.id}')">
+                Delete
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function toggleNoteResolved(noteId, newResolvedState) {
+      if (isFirebaseActive && fbDb && noteId) {
+        const { doc, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+        await updateDoc(doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes", noteId), {
+          resolved: newResolvedState,
+          resolvedAt: serverTimestamp()
+        });
+        showToast('Note status updated in Firestore.');
+      }
+    }
+
+    async function adminDeleteNote(noteId) {
+      if (!confirm('Are you sure you want to permanently delete this note from Firestore?')) return;
+      if (isFirebaseActive && fbDb && noteId) {
+        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+        await deleteDoc(doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes", noteId));
+        showToast('Note deleted from database.');
+      }
+    }
+
+    async function adminSubmitReply(noteId) {
+      const input = document.getElementById(`adminReplyInput_${noteId}`);
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + ' ' + now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+      const newReply = {
+        id: 'reply_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        author: 'Sickrit Studio',
+        text: text,
+        time: timeStr,
+        timestamp: now.toISOString()
+      };
+
+      if (isFirebaseActive && fbDb && noteId) {
+        try {
+          const { doc, getDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          const noteRef = doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes", noteId);
+          const snap = await getDoc(noteRef);
+          let existingReplies = [];
+          if (snap.exists() && snap.data().replies) {
+            existingReplies = snap.data().replies;
+          }
+          existingReplies.push(newReply);
+          await updateDoc(noteRef, { replies: existingReplies });
+          input.value = '';
+          showToast('Reply published to client portal!');
+        } catch (e) {
+          alert('Error sending reply: ' + e.message);
+        }
+      }
+    }
+
+    async function adminDeleteReply(noteId, replyIdx) {
+      if (!confirm('Delete this reply?')) return;
+      if (isFirebaseActive && fbDb && noteId) {
+        try {
+          const { doc, getDoc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+          const noteRef = doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes", noteId);
+          const snap = await getDoc(noteRef);
+          if (snap.exists() && snap.data().replies) {
+            const replies = snap.data().replies;
+            replies.splice(replyIdx, 1);
+            await updateDoc(noteRef, { replies: replies });
+            showToast('Reply deleted.');
+          }
+        } catch (e) {
+          alert('Error deleting reply: ' + e.message);
+        }
+      }
+    }
+
+    async function deleteAllResolvedNotes() {
+      if (!confirm('Delete all resolved notes from the database?')) return;
+      if (isFirebaseActive && fbDb) {
+        const { collection, getDocs, deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+        const snap = await getDocs(collection(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes"));
+        let count = 0;
+        snap.forEach(async (d) => {
+          if (d.data().resolved === true) {
+            await deleteDoc(doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "notes", d.id));
+            count++;
+          }
+        });
+        showToast('Deleted resolved notes from database.');
+      }
+    }
+
+    function exportNotesToTXT() {
+      const rows = document.querySelectorAll('#adminNotesTableBody tr');
+      let text = `SICKRIT STUDIO — CLIENT FEEDBACK NOTES EXPORT\nCLIENT: USZ\nDATE: ${new Date().toLocaleString()}\n------------------------------------------------\n\n`;
+      rows.forEach((r, i) => {
+        const cells = r.querySelectorAll('td');
+        if (cells.length >= 5) {
+          text += `[${i+1}] ${cells[0].textContent.trim()} | ${cells[1].textContent.trim()} | ${cells[2].textContent.trim()}\nComment: ${cells[3].textContent.trim()}\nStatus: ${cells[4].textContent.trim()}\n\n`;
+        }
+      });
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `USZ_Feedback_Notes.txt`;
+      a.click();
+    }
+
+    // Render Audit / Change Requests Table
+    function renderAdminAuditTable(items) {
+      const tbody = document.getElementById('adminAuditTableBody');
+      tbody.innerHTML = '';
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--mute); padding:24px;">No change requests logged.</td></tr>`;
+        return;
+      }
+      items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><span style="color:var(--danger-light); font-weight:700;">${escapeHTML(it.type || 'REVISION_REQUEST')}</span></td>
+          <td><span style="font-family:var(--font-mono); color:var(--gold);">${escapeHTML(it.optionTitle || it.optionId || 'Option')}</span></td>
+          <td><strong>${escapeHTML(it.reviewer || 'Client')}</strong></td>
+          <td style="max-width:300px;">"${escapeHTML(it.summary || '')}"</td>
+          <td style="font-size:11px; color:var(--mute);">${it.timestamp ? new Date(it.timestamp.toDate ? it.timestamp.toDate() : it.timestamp).toLocaleString() : 'Recent'}</td>
+          <td>
+            <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="adminDeleteAuditItem('${it.id}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function adminDeleteAuditItem(itemId) {
+      if (!confirm('Delete this audit log record?')) return;
+      if (isFirebaseActive && fbDb && itemId) {
+        const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js');
+        await deleteDoc(doc(fbDb, "projects", FIREBASE_CONFIG.documentId, "change_requests", itemId));
+        showToast('Record deleted.');
+      }
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[tag] || tag));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAdminFirebase();
+      renderScriptOptionSubnav();
+      updateMetaSelectedOptionDropdown();
+      loadScriptToEditor('option-1');
+    });
+  </script>
+</body>
+</html>
